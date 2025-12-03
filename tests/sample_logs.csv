@@ -1,0 +1,5 @@
+_timestamp,service,message
+2025-11-01T10:01:00Z,auth,ERROR: DB connection timeout
+2025-11-01T10:01:05Z,auth,WARN: retrying connection
+2025-11-01T10:01:30Z,db,ERROR: connection pool exhausted
+2025-11-01T10:02:00Z,app,INFO: request failed with 503
