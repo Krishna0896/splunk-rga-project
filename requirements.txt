@@ -1,0 +1,16 @@
+# core
+pandas
+python-dotenv
+fpdf
+
+
+# Splunk SDK
+splunk-sdk
+
+
+# Groq SDK
+groq
+
+
+# UI (optional)
+streamlit
