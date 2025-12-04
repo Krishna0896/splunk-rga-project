@@ -18,7 +18,7 @@ def analyze_logs(log_text):
     Send logs to Groq LLM for RCA analysis.
     """
     completion = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {"role": "system", "content": "You are an expert SRE performing root cause analysis."},
             {"role": "user", "content": f"Here are the logs:\n{log_text}\n\nProvide RCA."}
