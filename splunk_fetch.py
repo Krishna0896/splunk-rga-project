@@ -54,5 +54,5 @@ def fetch_splunk_logs(search_query):
 
 # Simple test call
 if __name__ == "__main__":
-    logs = fetch_splunk_logs("index=mylogs | head 5")
+    logs = fetch_splunk_logs("index=mylogs2 | head 5")
     print(json.dumps(logs, indent=2))
