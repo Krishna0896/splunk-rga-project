@@ -1,56 +1,61 @@
-# app_streamlit.py
-import os
-from dotenv import load_dotenv
 import streamlit as st
-from splunk_fetch import fetch_splunk_logs
-from csv_reader import read_csv_logs, read_excel_logs
-from rca_groq import generate_rca
-from save_pdf import save_text_pdf
-
+import pandas as pd
+import os
+from groq import Groq
+from dotenv import load_dotenv
 
 load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not GROQ_API_KEY:
+    st.error("GROQ_API_KEY not found. Add it to .env file.")
+    st.stop()
+
+client = Groq(api_key=GROQ_API_KEY)
 
 
-st.title("RCA Generator — Splunk / CSV → Groq")
+def generate_rca(log_text):
+    prompt = f"""
+    Perform a detailed Root Cause Analysis on the following logs:
+
+    logs:
+    {log_text}
+
+    Provide output in this format:
+    - Summary
+    - Root Cause
+    - Impact
+    - Timeline of Events
+    - Recommended Fix
+    - Preventive Actions
+    """
+
+    completion = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
+    )
+
+    return completion.choices[0].message.content
 
 
-source = st.selectbox("Input source:", ["Manual text", "Upload CSV", "Upload Excel", "Fetch from Splunk"])
+st.title("🔍 AI-Powered RCA Generator (Groq + Streamlit)")
 
+uploaded_file = st.file_uploader("Upload CSV log file", type=["csv"])
 
-incident = st.text_input("Incident description")
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
+    st.write("### 📄 Loaded Log File:")
+    st.dataframe(df)
 
+    # Convert DataFrame to plain text logs
+    log_text = "\n".join(
+        df.astype(str).apply(lambda row: ", ".join(row.values), axis=1)
+    )
 
-logs = []
+    if st.button("Generate RCA"):
+        with st.spinner("Analyzing logs using Groq..."):
+            rca_result = generate_rca(log_text)
 
-
-if source == "Upload CSV":
-f = st.file_uploader("Upload CSV file", type=["csv"])
-if f:
-logs = read_csv_logs(f)
-elif source == "Upload Excel":
-f = st.file_uploader("Upload Excel file", type=["xlsx"])
-if f:
-logs = read_excel_logs(f)
-elif source == "Fetch from Splunk":
-query = st.text_area("Splunk search query", value=f"search index={os.getenv('SPLUNK_INDEX','mylogs')} | head 200")
-if st.button("Fetch logs"):
-with st.spinner("Fetching logs from Splunk..."):
-logs = fetch_splunk_logs(query)
-else:
-logs = []
-
-
-if st.button("Generate RCA"):
-if not incident.strip() and not logs:
-st.error("Enter incident description or provide logs")
-else:
-with st.spinner("Generating RCA..."):
-rca_text = generate_rca(incident, logs or [])
-st.subheader("Generated RCA")
-st.text(rca_text)
-
-
-# PDF download
-pdf_file = save_text_pdf(rca_text, filename="rca_output.pdf")
-with open(pdf_file, "rb") as fh:
-st.download_button("Download PDF", fh, file_name=pdf_file)
+        st.write("### 🧠 RCA Output")
+        st.success(rca_result)
