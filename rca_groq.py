@@ -25,7 +25,7 @@ def analyze_logs(log_text):
         ]
     )
 
-    return completion.choices[0].message["content"]
+    return completion.choices[0].message.content
 
 
 if __name__ == "__main__":
