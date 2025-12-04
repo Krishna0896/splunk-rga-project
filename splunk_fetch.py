@@ -10,7 +10,7 @@ def fetch_splunk_logs(search_query):
     
     splunk_host = "https://localhost:8089"
     username = "admin"
-    password = "your_splunk_password_here"   # change this
+    password = "Mornemorkel@1996"   # change this
 
     # Splunk search job endpoint
     search_url = f"{splunk_host}/services/search/jobs"
