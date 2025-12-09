@@ -138,6 +138,110 @@ Click:
 [Generate RCA]
 
 
+
+1. Load Groq API + Environment Setup
+from groq import Groq
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.environ.get("GROQ_API_KEY")
+
+✔ Purpose
+
+Load your API key
+
+Allow secure authentication
+
+Prevent hard-coding your key in the script
+
+🔹 2. Create Groq Client
+client = Groq(api_key=api_key)
+
+✔ Purpose
+
+This creates a connection to Groq’s LLMs so you can send data to the AI model.
+
+🔹 3. Build Prompt for RCA (This is the Core AI Logic!)
+prompt = f"""
+You are an expert in Root Cause Analysis (RCA).
+Analyze the following logs and generate a structured RCA:
+
+LOGS:
+{logs}
+"""
+
+✔ Purpose
+
+You tell the model:
+
+What role it should play → "expert in RCA"
+
+What data to analyze → the logs
+
+What format you expect → structured RCA
+
+This is why the AI gives you:
+
+Symptoms
+
+Timeline
+
+Root cause
+
+Corrective actions
+
+🔹 4. Call the Groq Model
+completion = client.chat.completions.create(
+    model="llama-3.1-8b-instant",
+    messages=[{"role": "user", "content": prompt}],
+    temperature=0.2
+)
+
+✔ Purpose
+
+This sends your logs to the LLM and generates an RCA.
+
+Why temperature=0.2?
+
+Low temperature → predictable → professional RCA output.
+
+🔹 5. Extract AI Response
+return completion.choices[0].message.content
+
+✔ Purpose
+
+This extracts only the final RCA text from Groq’s response.
+
+🔹 6. Prints Final RCA
+print(analyze_logs(logs))
+
+
+You see something like:
+
+Root Cause: Database connection failure due to...
+Corrective Actions: Implement monitoring...
+
+🎯 Full Flow of RCA via Gen AI (Clear Summary)
+
+Here is the full process your code performs:
+
+Logs → Format into prompt → Send to Groq LLM → AI analyzes patterns →
+AI identifies root cause → AI generates RCA → Output to user
+
+🔥 Why This Works So Well
+
+Your Gen-AI RCA system works because:
+
+✔ The model sees real logs
+
+Time + service + message → patterns become obvious.
+
+✔ LLM recognizes error sequences
+
+Example:
+
+Retry → Timeout → Failure → Root cause = network latency
+
+
 You'll see:
 
 The RCA
